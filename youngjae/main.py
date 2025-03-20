@@ -113,17 +113,45 @@ def spiral_search(grid):
     print("모든 칸 탐색 완료!")
 
 
-# 빈 grid 생성 (모든 값이 0인 4*6 배열)
-grid = [[0 for _ in range(6)] for _ in range(4)]
 
-# 예: 각 셀에 특정 값이 있는 grid
-# grid = [
-#     [10, 20, 30, 40, 50, 60],
-#     [15, 25, 35, 45, 55, 65],
-#     [17, 27, 37, 47, 57, 67],
-#     [19, 29, 39, 49, 59, 69]
-# ]
+# BFS나 DFS 함수 호출 시 장애물 처리 추가
+def bfs_search_with_obstacles(grid, start_row=0, start_col=0):
+    rows, cols = 4, 6
+    visited = [[False for _ in range(cols)] for _ in range(rows)]
+    
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    
+    queue = deque([(start_row, start_col)])
+    visited[start_row][start_col] = True
+    
+    while queue:
+        row, col = queue.popleft()
+        print(f"로봇이 ({row}, {col}) 위치 탐색 중")
+        
+        # 목표 지점에 도달했는지 확인
+        if grid[row][col] == 2:
+            print("목표 지점에 도달했습니다!")
+        
+        for dr, dc in directions:
+            new_row, new_col = row + dr, col + dc
+            
+            if (0 <= new_row < rows and 0 <= new_col < cols and 
+                not visited[new_row][new_col] and grid[new_row][new_col] != 1):  # 장애물(1) 피하기
+                queue.append((new_row, new_col))
+                visited[new_row][new_col] = True
+    
+    print("탐색 완료!")
 
+
+
+
+# 예: 0은 빈 공간, 1은 장애물, 2는 목표 지점
+grid = [
+    [0, 0, 0, 1, 0, 0],
+    [0, 1, 0, 0, 0, 0],
+    [0, 0, 0, 1, 2, 0],
+    [0, 1, 0, 0, 0, 0]
+]
 
 # 함수 호출
 dfs_search(grid)  # 또는 다른 탐색 함수들
