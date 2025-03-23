@@ -7,225 +7,6 @@ import numpy as np
 from IPython.display import clear_output, display
 
 
-def sequential_search(grid):
-    rows, cols = 4, 6
-    
-    for row in range(rows):
-        for col in range(cols):
-            # 현재 위치 (row, col)에서 작업 수행
-            print(f"로봇이 ({row}, {col}) 위치 탐색 중")
-            
-            # 여기에 실제 로봇 작업 코드 추가
-            # 예: 센서 읽기, 데이터 수집 등
-            
-    print("모든 칸 탐색 완료!")
-
-def zigzag_search(grid):
-    rows, cols = 4, 6
-    
-    for row in range(rows):
-        if row % 2 == 0:  # 짝수 행은 왼쪽에서 오른쪽으로
-            for col in range(cols):
-                print(f"로봇이 ({row}, {col}) 위치 탐색 중")
-                # 작업 수행
-        else:  # 홀수 행은 오른쪽에서 왼쪽으로
-            for col in range(cols-1, -1, -1):
-                print(f"로봇이 ({row}, {col}) 위치 탐색 중")
-                # 작업 수행
-                
-    print("모든 칸 탐색 완료!")
-
-
-
-def bfs_search(grid, start_row=0, start_col=0):
-    rows, cols = 4, 6
-    visited = [[False for _ in range(cols)] for _ in range(rows)]
-    
-    # 상하좌우 이동 방향
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    
-    queue = deque([(start_row, start_col)])
-    visited[start_row][start_col] = True
-    
-    while queue:
-        row, col = queue.popleft()
-        print(f"로봇이 ({row}, {col}) 위치 탐색 중")
-        # 작업 수행
-        
-        for dr, dc in directions:
-            new_row, new_col = row + dr, col + dc
-            
-            if (0 <= new_row < rows and 0 <= new_col < cols and 
-                not visited[new_row][new_col]):
-                queue.append((new_row, new_col))
-                visited[new_row][new_col] = True
-    
-    print("모든 칸 탐색 완료!")
-
-
-
-def dfs_search(grid, start_row=0, start_col=0):
-    rows, cols = 4, 6
-    visited = [[False for _ in range(cols)] for _ in range(rows)]
-    
-    # 상하좌우 이동 방향
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    
-    def dfs(row, col):
-        visited[row][col] = True
-        print(f"로봇이 ({row}, {col}) 위치 탐색 중")
-        # 작업 수행
-        
-        for dr, dc in directions:
-            new_row, new_col = row + dr, col + dc
-            
-            if (0 <= new_row < rows and 0 <= new_col < cols and 
-                not visited[new_row][new_col]):
-                dfs(new_row, new_col)
-    
-    dfs(start_row, start_col)
-    print("모든 칸 탐색 완료!")
-
-def spiral_search(grid):
-    rows, cols = 4, 6
-    
-    # 방문 여부 추적
-    visited = [[False for _ in range(cols)] for _ in range(rows)]
-    
-    # 시작 지점
-    row, col = 0, 0
-    
-    # 우, 하, 좌, 상 순서로 이동
-    dr = [0, 1, 0, -1]
-    dc = [1, 0, -1, 0]
-    
-    direction = 0  # 초기 방향 (우측으로)
-    
-    for _ in range(rows * cols):
-        print(f"로봇이 ({row}, {col}) 위치 탐색 중")
-        visited[row][col] = True
-        
-        # 다음 위치 계산
-        next_row, next_col = row + dr[direction], col + dc[direction]
-        
-        # 방향 전환 필요 여부 확인
-        if (next_row < 0 or next_row >= rows or next_col < 0 or next_col >= cols or 
-            visited[next_row][next_col]):
-            direction = (direction + 1) % 4  # 방향 변경
-            next_row, next_col = row + dr[direction], col + dc[direction]
-        
-        row, col = next_row, next_col
-    
-    print("모든 칸 탐색 완료!")
-
-
-
-# BFS나 DFS 함수 호출 시 장애물 처리 추가
-directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-
-
-def bfs_search_with_obstacles(grid, start_row=0, start_col=0):
-    rows, cols = 4, 6
-    visited = [[False for _ in range(cols)] for _ in range(rows)]
-    
-    
-    
-    queue = deque([(start_row, start_col)])
-    visited[start_row][start_col] = True
-    
-    while queue:
-        row, col = queue.popleft()
-        print(f"로봇이 ({row}, {col}) 위치 탐색 중")
-        
-        # 목표 지점에 도달했는지 확인
-        if grid[row][col] == 2:
-            print("목표 지점에 도달했습니다!")
-        
-        for dr, dc in directions:
-            new_row, new_col = row + dr, col + dc
-            
-            if (0 <= new_row < rows and 0 <= new_col < cols and 
-                not visited[new_row][new_col] and grid[new_row][new_col] != 1):  # 장애물(1) 피하기
-                queue.append((new_row, new_col))
-                visited[new_row][new_col] = True
-    
-    print("탐색 완료!")
-
-
-
-# 함수 호출
-# bfs_search_with_obstacles(grid)  # 또는 다른 탐색 함수들
-
-def robot_search(grid, start_row=0, start_col=0):
-    rows, cols = 4, 6
-    visited = [[False for _ in range(cols)] for _ in range(rows)]
-    
-    # 상하좌우 이동 방향 (가로/세로 인접 칸만)
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    direction_names = ["오른쪽", "아래쪽", "왼쪽", "위쪽"]
-    
-    # 경로 추적을 위한 부모 노드 저장
-    parent = {}
-    
-    queue = deque([(start_row, start_col)])
-    visited[start_row][start_col] = True
-    
-    # 로봇의 현재 위치
-    current_position = (start_row, start_col)
-    print(f"로봇이 ({start_row}, {start_col}) 위치로 이동했습니다")
-    
-    # RedCell 발견 횟수 추적
-    red_cells_found = 0
-    red_cell_positions = []
-    
-    # 로봇의 이동 경로 기록
-    path = [(start_row, start_col)]
-    
-    while queue:
-        row, col = queue.popleft()
-        
-        # 현재 위치에서 인접한 칸의 장애물 확인
-        for i, (dr, dc) in enumerate(directions):
-            check_row, check_col = row + dr, col + dc
-            if (0 <= check_row < rows and 0 <= check_col < cols):
-                if grid[check_row][check_col] == 1:  # 장애물 감지
-                    print(f"({row}, {col})에서 {direction_names[i]} 방향에 장애물이 감지되었습니다")
-        
-        # RedCell(목표 지점) 확인
-        if grid[row][col] == 2 and (row, col) not in red_cell_positions:
-            red_cells_found += 1
-            red_cell_positions.append((row, col))
-            print(f"RedCell 발견! 위치: ({row}, {col})")
-            
-            # 모든 RedCell을 찾았는지 확인 (최대 2개)
-            if red_cells_found == 2:
-                print("모든 RedCell을 찾았습니다!")
-                print(f"RedCell 위치들: {red_cell_positions}")
-                return red_cell_positions
-        
-        for dr, dc in directions:
-            new_row, new_col = row + dr, col + dc
-            
-            # 유효한 위치이고, 아직 방문하지 않았고, Box(장애물)가 아닌 경우에만 이동
-            if (0 <= new_row < rows and 0 <= new_col < cols and 
-                not visited[new_row][new_col] and grid[new_row][new_col] != 1):
-                
-                # 로봇이 실제로 이동할 때만 출력
-                print(f"로봇이 ({new_row}, {new_col}) 위치로 이동했습니다")
-                
-                queue.append((new_row, new_col))
-                visited[new_row][new_col] = True
-                parent[(new_row, new_col)] = (row, col)
-    
-    # 모든 탐색이 끝났지만 RedCell을 모두 찾지 못한 경우
-    if red_cells_found < 2:
-        print(f"탐색 완료! {red_cells_found}개의 RedCell만 찾았습니다.")
-    else:
-        print("탐색 완료!")
-    
-    return red_cell_positions
-
-
 def robot_search_animation(grid, start_row=0, start_col=0):
     rows, cols = 4, 6
     visited = [[False for _ in range(cols)] for _ in range(rows)]
@@ -261,81 +42,45 @@ def robot_search_animation(grid, start_row=0, start_col=0):
         
         return visual_copy
     
-    # BFS 탐색 - 부모 노드 맵 구성
-    def bfs_and_get_parent_map():
-        # BFS를 위한 큐 초기화
-        bfs_queue = deque([(start_row, start_col)])
-        # 방문 여부 기록
-        bfs_visited = set([(start_row, start_col)])
-        # 부모 노드 기록 (경로 추적용)
-        parent = {}
-        
-        # 시작 위치는 부모가 자기 자신 (순환 방지)
-        parent[(start_row, start_col)] = (start_row, start_col)
-        
-        while bfs_queue:
-            r, c = bfs_queue.popleft()
+    # 두 위치 간의 맨해튼 거리 계산
+    def manhattan_distance(pos1, pos2):
+        return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
+    
+    # BFS로 두 위치 간의 최단 경로 찾기
+    def find_path(start, end):
+        if start == end:
+            return []
             
-            # 인접 셀 탐색
+        queue = deque([start])
+        path_parent = {start: None}
+        
+        while queue:
+            current = queue.popleft()
+            
+            if current == end:
+                # 경로 역추적
+                path = []
+                while current != start:
+                    path.append(current)
+                    current = path_parent[current]
+                return list(reversed(path))
+            
             for dr, dc in directions:
-                new_r, new_c = r + dr, c + dc
+                next_r, next_c = current[0] + dr, current[1] + dc
+                next_pos = (next_r, next_c)
                 
-                # 유효하고 아직 방문하지 않은 셀이면서 장애물이 아닌 경우
-                if (0 <= new_r < rows and 0 <= new_c < cols and 
-                    (new_r, new_c) not in bfs_visited and grid[new_r][new_c] != 1):
-                    
-                    bfs_queue.append((new_r, new_c))
-                    bfs_visited.add((new_r, new_c))
-                    parent[(new_r, new_c)] = (r, c)  # 부모 노드 기록
+                if (0 <= next_r < rows and 0 <= next_c < cols and 
+                    next_pos not in path_parent and grid[next_r][next_c] != 1):
+                    queue.append(next_pos)
+                    path_parent[next_pos] = current
         
-        return parent, bfs_visited
-    
-    # 부모 노드 맵 구성 및 BFS로 방문 가능한 모든 셀 확인
-    parent_map, reachable_cells = bfs_and_get_parent_map()
-    
-    # 현재 위치에서 목표 위치까지의 경로 찾기 (무한 루프 방지)
-    def get_path(current, target):
-        # 시작 위치와 목표 위치가 같으면 빈 경로 반환
-        if current == target:
-            return []
-        
-        # 목표 위치가 도달 불가능하면 빈 경로 반환
-        if target not in reachable_cells:
-            print(f"경고: 위치 {target}에 도달할 수 없습니다.")
-            return []
-        
-        # 경로를 저장할 리스트
-        path = []
-        temp = target
-        visited_in_path = set()  # 순환 감지용
-        
-        # 경로 역추적 (무한 루프 방지)
-        max_iterations = rows * cols  # 최대 반복 제한
-        iterations = 0
-        
-        while temp != current:
-            # 무한 루프 방지
-            if temp in visited_in_path or iterations >= max_iterations:
-                print(f"경고: 경로 탐색 중 문제 발생. 부분 경로만 반환합니다.")
-                return list(reversed(path))
-            
-            visited_in_path.add(temp)
-            path.append(temp)
-            
-            # parent_map에 키가 없는 경우 처리
-            if temp not in parent_map:
-                print(f"오류: 위치 {temp}의 부모 노드를 찾을 수 없습니다.")
-                return list(reversed(path))
-            
-            temp = parent_map[temp]
-            iterations += 1
-        
-        # 경로 역순으로 변환
-        return list(reversed(path))
+        return []  # 경로가 없는 경우
     
     # 로봇 상태 변수
     robot_pos = (start_row, start_col)
+    start_pos = (start_row, start_col)  # 시작 위치 저장
     visited_cells = [(start_row, start_col)]
+    visited[start_row][start_col] = True
     red_cells_found = 0
     red_cell_positions = []
     
@@ -345,74 +90,107 @@ def robot_search_animation(grid, start_row=0, start_col=0):
     # 초기 상태 (시작 위치)
     frames.append(update_visual_grid(robot_pos, visited_cells))
     
-    # 탐색할 위치들 - BFS 순으로 정렬
-    cells_to_visit = []
+    # 방문할 수 있는 모든 셀 찾기
+    all_reachable_cells = []
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] != 1:  # 장애물이 아니면
+                all_reachable_cells.append((r, c))
     
-    # BFS 순서로 모든 셀 탐색
-    bfs_queue = deque([(start_row, start_col)])
-    bfs_visited = set([(start_row, start_col)])
+    # 로봇이 이동하며 탐색
+    search_complete = False
+    returning_to_start = False
     
-    while bfs_queue:
-        r, c = bfs_queue.popleft()
-        
-        # 시작 위치는 이미 방문했으므로 추가하지 않음
-        if (r, c) != (start_row, start_col):
-            cells_to_visit.append((r, c))
-        
-        for dr, dc in directions:
-            new_r, new_c = r + dr, c + dc
-            
-            if (0 <= new_r < rows and 0 <= new_c < cols and 
-                (new_r, new_c) not in bfs_visited and grid[new_r][new_c] != 1):
+    while not search_complete:
+        if not returning_to_start:
+            # RedCell을 모두 찾았는지 확인
+            if red_cells_found >= 2:
+                print("모든 RedCell을 찾았습니다. 원점으로 돌아갑니다.")
+                returning_to_start = True
+                # 원점으로 가는 경로 찾기
+                return_path = find_path(robot_pos, start_pos)
                 
-                bfs_queue.append((new_r, new_c))
-                bfs_visited.add((new_r, new_c))
-    
-    print(f"방문할 셀 수: {len(cells_to_visit)}")
-    
-    # 실제 탐색 및 애니메이션 프레임 생성
-    for target in cells_to_visit:
-        # 이미 방문했거나 RedCell을 모두 찾은 경우 건너뛰기
-        if target in visited_cells or red_cells_found >= 2:
-            continue
-        
-        print(f"현재 위치 {robot_pos}에서 목표 {target}까지 경로 계산 중...")
-        
-        # 현재 위치에서 목표까지의 경로 찾기
-        path = get_path(robot_pos, target)
-        
-        if not path:
-            print(f"유효한 경로를 찾을 수 없습니다: {robot_pos} -> {target}")
-            continue
-        
-        print(f"경로 찾음 (길이: {len(path)}): {path}")
-        
-        # 경로를 따라 이동
-        for next_pos in path:
-            # 로봇 이동
-            robot_pos = next_pos
-            if next_pos not in visited_cells:
-                visited_cells.append(next_pos)
-                visited[next_pos[0]][next_pos[1]] = True
-            
-            # 프레임 추가
-            frames.append(update_visual_grid(robot_pos, visited_cells))
-            
-            # RedCell 확인
-            r, c = robot_pos
-            if grid[r][c] == 2 and (r, c) not in red_cell_positions:
-                red_cells_found += 1
-                red_cell_positions.append((r, c))
-                print(f"RedCell 발견! 위치: ({r}, {c})")
+                if not return_path:
+                    print("원점으로 돌아가는 경로를 찾을 수 없습니다.")
+                    search_complete = True
+                    continue
                 
-                # 모든 RedCell을 찾았으면 종료
-                if red_cells_found == 2:
-                    break
+                # 원점으로 돌아가기
+                for next_pos in return_path:
+                    # 로봇 이동
+                    robot_pos = next_pos
+                    if next_pos not in visited_cells:
+                        visited_cells.append(next_pos)
+                    
+                    # 프레임 추가
+                    frames.append(update_visual_grid(robot_pos, visited_cells))
+                
+                # 원점 도착 메시지
+                print(f"원점 ({start_pos[0]}, {start_pos[1]})에 도착했습니다.")
+                search_complete = True
+                continue
+            
+            # 다음 방문할 위치 찾기 (가장 가까운 미방문 위치)
+            next_target = None
+            min_distance = float('inf')
+            
+            for cell in all_reachable_cells:
+                r, c = cell
+                # 이미 방문했거나 장애물이면 건너뛰기
+                if visited[r][c] or grid[r][c] == 1:
+                    continue
+                    
+                # 현재 로봇 위치에서의 거리 계산
+                dist = manhattan_distance(robot_pos, cell)
+                if dist < min_distance:
+                    min_distance = dist
+                    next_target = cell
+            
+            # 더 이상 방문할 위치가 없으면 RedCell 탐색 종료
+            if next_target is None:
+                print("모든 도달 가능한 위치를 탐색했습니다.")
+                
+                # RedCell을 모두 찾았으면 원점으로 돌아가기
+                if red_cells_found >= 2:
+                    returning_to_start = True
+                    continue
+                else:
+                    search_complete = True
+                    continue
+            
+            # 목표 위치까지의 경로 찾기
+            path = find_path(robot_pos, next_target)
+            
+            # 경로가 없으면 다음 위치로
+            if not path:
+                print(f"위치 {next_target}까지 경로를 찾을 수 없습니다.")
+                # 다음에 재방문하지 않도록 표시
+                r, c = next_target
+                visited[r][c] = True
+                continue
+            
+            # 경로를 따라 이동
+            for next_pos in path:
+                # 로봇 이동
+                robot_pos = next_pos
+                r, c = next_pos
+                
+                if not visited[r][c]:
+                    visited[r][c] = True
+                    visited_cells.append(next_pos)
+                
+                # 프레임 추가
+                frames.append(update_visual_grid(robot_pos, visited_cells))
+                
+                # RedCell 확인
+                if grid[r][c] == 2 and next_pos not in red_cell_positions:
+                    red_cells_found += 1
+                    red_cell_positions.append(next_pos)
+                    print(f"RedCell 발견! 위치: {next_pos}")
     
     print(f"총 {len(frames)} 프레임의 애니메이션이 생성되었습니다")
     
     # matplotlib 애니메이션 실행
-    # 애니메이션 설정
     fig, ax = plt.subplots(figsize=(8, 6))
     
     # 애니메이션 함수
@@ -429,8 +207,13 @@ def robot_search_animation(grid, start_row=0, start_col=0):
             ax.set_yticklabels([])
             
             # 제목 업데이트
-            found_cells = sum(1 for r, c in visited_cells if grid[r][c] == 2)
-            ax.set_title(f"로봇 탐색 (RedCell: {found_cells}/2)")
+            found_cells = sum(1 for pos in red_cell_positions if pos in visited_cells[:frame_num+1])
+            
+            # 모든 RedCell을 찾은 후 원점으로 돌아가는 상태 표시
+            if found_cells == 2 and frame_num >= len(frames) - len(find_path(red_cell_positions[-1], start_pos)):
+                ax.set_title(f"RedCell: {found_cells}/2 - 원점으로 돌아가는 중")
+            else:
+                ax.set_title(f"로봇 탐색 (RedCell: {found_cells}/2)")
     
     # 범례 추가
     import matplotlib.patches as mpatches
