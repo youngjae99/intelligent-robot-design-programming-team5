@@ -411,101 +411,46 @@ def robot_search_animation(grid, start_row=0, start_col=0):
     
     print(f"총 {len(frames)} 프레임의 애니메이션이 생성되었습니다")
     
-    # 터미널 애니메이션으로 대체 (matplotlib 문제 방지)
-    def terminal_animation():
-        print("\n터미널 애니메이션 시작...")
-        
-        for i, frame in enumerate(frames):
-            # 화면 지우기 (시스템에 따라 다름)
-            print("\033c", end="")
-            
-            # 현재 로봇 위치 찾기 (파란색 픽셀)
-            robot_r, robot_c = None, None
-            for r in range(rows):
-                for c in range(cols):
-                    if tuple(frame[r, c]) == (0, 0, 1):  # 파란색 == 로봇
-                        robot_r, robot_c = r, c
-            
-            # 그리드 출력
-            print(f"프레임 {i+1}/{len(frames)}")
-            print("+" + "-" * (cols * 2 - 1) + "+")
-            for r in range(rows):
-                line = "|"
-                for c in range(cols):
-                    if r == robot_r and c == robot_c:
-                        line += "R"  # 로봇
-                    elif grid[r][c] == 1:
-                        line += "■"  # 장애물
-                    elif grid[r][c] == 2:
-                        line += "X"  # RedCell
-                    elif tuple(frame[r, c]) == (0.8, 0.8, 1):  # 연한 파란색 == 방문한 위치
-                        line += "·"  # 방문한 위치
-                    else:
-                        line += " "  # 빈 공간
-                    
-                    if c < cols - 1:
-                        line += " "
-                line += "|"
-                print(line)
-            print("+" + "-" * (cols * 2 - 1) + "+")
-            print("R: 로봇, ■: 장애물, X: RedCell, ·: 방문한 위치")
-            
-            # RedCell 상태 출력
-            print(f"찾은 RedCell: {len(red_cell_positions)}/{2}")
-            
-            # 지연
-            time.sleep(0.5)
+    # matplotlib 애니메이션 실행
+    # 애니메이션 설정
+    fig, ax = plt.subplots(figsize=(8, 6))
     
-    # 터미널 애니메이션 실행
-    try:
-        terminal_animation()
-    except KeyboardInterrupt:
-        print("애니메이션이 중단되었습니다.")
+    # 애니메이션 함수
+    def update(frame_num):
+        if frame_num < len(frames):
+            ax.clear()
+            ax.imshow(frames[frame_num])
+            
+            # 그리드 라인 추가
+            ax.grid(which='major', axis='both', linestyle='-', color='k', linewidth=2)
+            ax.set_xticks(np.arange(-0.5, cols, 1))
+            ax.set_yticks(np.arange(-0.5, rows, 1))
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+            
+            # 제목 업데이트
+            found_cells = sum(1 for r, c in visited_cells if grid[r][c] == 2)
+            ax.set_title(f"로봇 탐색 (RedCell: {found_cells}/2)")
     
-    # matplotlib 애니메이션 실행 (선택적)
-    try:
-        # 애니메이션 설정
-        fig, ax = plt.subplots(figsize=(8, 6))
-        
-        # 애니메이션 함수
-        def update(frame_num):
-            if frame_num < len(frames):
-                ax.clear()
-                ax.imshow(frames[frame_num])
-                
-                # 그리드 라인 추가
-                ax.grid(which='major', axis='both', linestyle='-', color='k', linewidth=2)
-                ax.set_xticks(np.arange(-0.5, cols, 1))
-                ax.set_yticks(np.arange(-0.5, rows, 1))
-                ax.set_xticklabels([])
-                ax.set_yticklabels([])
-                
-                # 제목 업데이트
-                found_cells = sum(1 for r, c in visited_cells if grid[r][c] == 2)
-                ax.set_title(f"로봇 탐색 (RedCell: {found_cells}/2)")
-        
-        # 범례 추가
-        import matplotlib.patches as mpatches
-        legend_elements = [
-            mpatches.Patch(color='white', label='빈 공간'),
-            mpatches.Patch(color='brown', label='장애물(Box)'),
-            mpatches.Patch(color='red', label='RedCell'),
-            mpatches.Patch(color='blue', label='로봇'),
-            mpatches.Patch(color=[0.8, 0.8, 1], label='방문한 위치')
-        ]
-        ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1, 1))
-        
-        # 애니메이션 생성
-        anim = animation.FuncAnimation(
-            fig, update, frames=len(frames), interval=500, repeat=False)
-        
-        plt.tight_layout()
-        plt.show()
-        
-        return anim, red_cell_positions
-    except Exception as e:
-        print(f"matplotlib 애니메이션 오류: {e}")
-        return None, red_cell_positions
+    # 범례 추가
+    import matplotlib.patches as mpatches
+    legend_elements = [
+        mpatches.Patch(color='white', label='빈 공간'),
+        mpatches.Patch(color='brown', label='장애물(Box)'),
+        mpatches.Patch(color='red', label='RedCell'),
+        mpatches.Patch(color='blue', label='로봇'),
+        mpatches.Patch(color=[0.8, 0.8, 1], label='방문한 위치')
+    ]
+    ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1, 1))
+    
+    # 애니메이션 생성
+    anim = animation.FuncAnimation(
+        fig, update, frames=len(frames), interval=500, repeat=False)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    return anim, red_cell_positions
 
 # 테스트 코드
 if __name__ == "__main__":
