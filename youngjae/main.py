@@ -19,15 +19,17 @@ def robot_search_animation(grid, start_row=0, start_col=0):
     # Array for visualization
     visual_grid = np.zeros((rows, cols, 3))
     
-    # Initialize grid colors
+    # Initialize grid colors and print obstacles/RedCells
     for r in range(rows):
         for c in range(cols):
             if grid[r][c] == 0:  # Empty space
                 visual_grid[r, c] = [1, 1, 1]  # White
             elif grid[r][c] == 1:  # Obstacle (Box)
                 visual_grid[r, c] = [0.6, 0.4, 0.2]  # Brown
+                print(f"({r}, {c}, B)")  # Print Block position
             elif grid[r][c] == 2:  # RedCell
                 visual_grid[r, c] = [1, 0, 0]  # Red
+                print(f"({r}, {c}, R)")  # Print RedCell position
     
     # Robot position and visited position visualization function
     def update_visual_grid(robot_pos, visited_cells):
@@ -188,7 +190,7 @@ def robot_search_animation(grid, start_row=0, start_col=0):
                 if grid[r][c] == 2 and next_pos not in red_cell_positions:
                     red_cells_found += 1
                     red_cell_positions.append(next_pos)
-                    print(f"RedCell found! Position: {next_pos}")
+                    print(f"({r}, {c}, R)")  # Print RedCell with format (row, col, R)
     
     print(f"Total {len(frames)} animation frames generated.")
     
@@ -208,35 +210,19 @@ def robot_search_animation(grid, start_row=0, start_col=0):
             ax.set_xticklabels([])
             ax.set_yticklabels([])
             
-            # Update title - display differently depending on Korean support
+            # Update title
             found_cells = sum(1 for pos in red_cell_positions if pos in visited_cells[:frame_num+1])
-            
-            if use_korean:
-                # Show status after finding all RedCells and returning to origin
-                if found_cells == 2 and frame_num >= len(frames) - len(find_path(red_cell_positions[-1], start_pos)) - 1:
-                    ax.set_title(f"RedCell: {found_cells}/2 - Returning to origin")
-                else:
-                    ax.set_title(f"Robot Search (RedCell: {found_cells}/2)")
+
+            # Display in English
+            if found_cells == 2 and frame_num >= len(frames) - len(find_path(red_cell_positions[-1], start_pos)) - 1:
+                ax.set_title(f"RedCell: {found_cells}/2 - Returning to origin")
             else:
-                # Display in English
-                if found_cells == 2 and frame_num >= len(frames) - len(find_path(red_cell_positions[-1], start_pos)) - 1:
-                    ax.set_title(f"RedCell: {found_cells}/2 - Returning to origin")
-                else:
-                    ax.set_title(f"Robot Search (RedCell: {found_cells}/2)")
+                ax.set_title(f"Robot Search (RedCell: {found_cells}/2)")
     
-    # Add legend - display differently depending on Korean support
+    # Add legend
     import matplotlib.patches as mpatches
     
-    if use_korean:
-        legend_elements = [
-            mpatches.Patch(color='white', label='Empty Space'),
-            mpatches.Patch(color='brown', label='Obstacle (Box)'),
-            mpatches.Patch(color='red', label='RedCell'),
-            mpatches.Patch(color='blue', label='Robot'),
-            mpatches.Patch(color=[0.8, 0.8, 1], label='Visited Positions')
-        ]
-    else:
-        legend_elements = [
+    legend_elements = [
             mpatches.Patch(color='white', label='Empty'),
             mpatches.Patch(color='brown', label='Box (Obstacle)'),
             mpatches.Patch(color='red', label='RedCell'),
