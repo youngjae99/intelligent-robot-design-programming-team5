@@ -2,51 +2,53 @@ import time
 from collections import deque
 
 import matplotlib.animation as animation
+import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import clear_output, display
 
 
-def robot_search_animation(grid, start_row=0, start_col=0):
+def robot_search_animation(grid, start_row=0, start_col=0):    
+    
     rows, cols = 4, 6
     visited = [[False for _ in range(cols)] for _ in range(rows)]
     
-    # 상하좌우 이동 방향
+    # Up, down, left, right movement directions
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     
-    # 시각화를 위한 배열
+    # Array for visualization
     visual_grid = np.zeros((rows, cols, 3))
     
-    # 그리드 색상 초기화
+    # Initialize grid colors
     for r in range(rows):
         for c in range(cols):
-            if grid[r][c] == 0:  # 빈 공간
-                visual_grid[r, c] = [1, 1, 1]  # 흰색
-            elif grid[r][c] == 1:  # 장애물(Box)
-                visual_grid[r, c] = [0.6, 0.4, 0.2]  # 갈색
+            if grid[r][c] == 0:  # Empty space
+                visual_grid[r, c] = [1, 1, 1]  # White
+            elif grid[r][c] == 1:  # Obstacle (Box)
+                visual_grid[r, c] = [0.6, 0.4, 0.2]  # Brown
             elif grid[r][c] == 2:  # RedCell
-                visual_grid[r, c] = [1, 0, 0]  # 빨간색
+                visual_grid[r, c] = [1, 0, 0]  # Red
     
-    # 로봇 위치, 방문한 위치 시각화 함수
+    # Robot position and visited position visualization function
     def update_visual_grid(robot_pos, visited_cells):
         visual_copy = visual_grid.copy()
         
-        # 방문한 위치 표시
+        # Mark visited positions
         for r, c in visited_cells:
-            if grid[r][c] != 1 and grid[r][c] != 2:  # 장애물이나 RedCell이 아닌 경우
-                visual_copy[r, c] = [0.8, 0.8, 1]  # 연한 파란색
+            if grid[r][c] != 1 and grid[r][c] != 2:  # If not an obstacle or RedCell
+                visual_copy[r, c] = [0.8, 0.8, 1]  # Light blue
         
-        # 로봇 위치 표시
+        # Mark robot position
         r, c = robot_pos
-        visual_copy[r, c] = [0, 0, 1]  # 파란색
+        visual_copy[r, c] = [0, 0, 1]  # Blue
         
         return visual_copy
     
-    # 두 위치 간의 맨해튼 거리 계산
+    # Calculate Manhattan distance between two positions
     def manhattan_distance(pos1, pos2):
         return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
     
-    # BFS로 두 위치 간의 최단 경로 찾기
+    # Find shortest path between two positions using BFS
     def find_path(start, end):
         if start == end:
             return []
@@ -58,7 +60,7 @@ def robot_search_animation(grid, start_row=0, start_col=0):
             current = queue.popleft()
             
             if current == end:
-                # 경로 역추적
+                # Backtrack path
                 path = []
                 while current != start:
                     path.append(current)
@@ -74,83 +76,83 @@ def robot_search_animation(grid, start_row=0, start_col=0):
                     queue.append(next_pos)
                     path_parent[next_pos] = current
         
-        return []  # 경로가 없는 경우
+        return []  # If no path exists
     
-    # 로봇 상태 변수
+    # Robot status variables
     robot_pos = (start_row, start_col)
-    start_pos = (start_row, start_col)  # 시작 위치 저장
+    start_pos = (start_row, start_col)  # Store starting position
     visited_cells = [(start_row, start_col)]
     visited[start_row][start_col] = True
     red_cells_found = 0
     red_cell_positions = []
     
-    # 각 단계별 애니메이션 프레임
+    # Animation frames for each step
     frames = []
     
-    # 초기 상태 (시작 위치)
+    # Initial state (starting position)
     frames.append(update_visual_grid(robot_pos, visited_cells))
     
-    # 방문할 수 있는 모든 셀 찾기
+    # Find all cells that can be visited
     all_reachable_cells = []
     for r in range(rows):
         for c in range(cols):
-            if grid[r][c] != 1:  # 장애물이 아니면
+            if grid[r][c] != 1:  # If not an obstacle
                 all_reachable_cells.append((r, c))
     
-    # 로봇이 이동하며 탐색
+    # Robot moves and explores
     search_complete = False
     returning_to_start = False
     
     while not search_complete:
         if not returning_to_start:
-            # RedCell을 모두 찾았는지 확인
+            # Check if all RedCells are found
             if red_cells_found >= 2:
-                print("모든 RedCell을 찾았습니다. 원점으로 돌아갑니다.")
+                print("All RedCells found. Returning to origin.")
                 returning_to_start = True
-                # 원점으로 가는 경로 찾기
+                # Find path to origin
                 return_path = find_path(robot_pos, start_pos)
                 
                 if not return_path:
-                    print("원점으로 돌아가는 경로를 찾을 수 없습니다.")
+                    print("Cannot find path back to origin.")
                     search_complete = True
                     continue
                 
-                # 원점으로 돌아가기
+                # Return to origin
                 for next_pos in return_path:
-                    # 로봇 이동
+                    # Robot movement
                     robot_pos = next_pos
                     if next_pos not in visited_cells:
                         visited_cells.append(next_pos)
                     
-                    # 프레임 추가
+                    # Add frame
                     frames.append(update_visual_grid(robot_pos, visited_cells))
                 
-                # 원점 도착 메시지
-                print(f"원점 ({start_pos[0]}, {start_pos[1]})에 도착했습니다.")
+                # Origin arrival message
+                print(f"Arrived at origin ({start_pos[0]}, {start_pos[1]}).")
                 search_complete = True
                 continue
             
-            # 다음 방문할 위치 찾기 (가장 가까운 미방문 위치)
+            # Find next position to visit (closest unvisited position)
             next_target = None
             min_distance = float('inf')
             
             for cell in all_reachable_cells:
                 r, c = cell
-                # 이미 방문했거나 장애물이면 건너뛰기
+                # Skip if already visited or is an obstacle
                 if visited[r][c] or grid[r][c] == 1:
                     continue
                     
-                # 현재 로봇 위치에서의 거리 계산
+                # Calculate distance from current robot position
                 dist = manhattan_distance(robot_pos, cell)
                 if dist < min_distance:
                     min_distance = dist
                     next_target = cell
             
-            # 더 이상 방문할 위치가 없으면 RedCell 탐색 종료
+            # End RedCell search if no more positions to visit
             if next_target is None:
-                print("모든 도달 가능한 위치를 탐색했습니다.")
+                print("Explored all reachable positions.")
                 
-                # RedCell을 모두 찾았으면 원점으로 돌아가기
+                # If all RedCells found, return to origin
                 if red_cells_found >= 2:
                     returning_to_start = True
                     continue
@@ -158,20 +160,20 @@ def robot_search_animation(grid, start_row=0, start_col=0):
                     search_complete = True
                     continue
             
-            # 목표 위치까지의 경로 찾기
+            # Find path to target position
             path = find_path(robot_pos, next_target)
             
-            # 경로가 없으면 다음 위치로
+            # If no path, move to next position
             if not path:
-                print(f"위치 {next_target}까지 경로를 찾을 수 없습니다.")
-                # 다음에 재방문하지 않도록 표시
+                print(f"Cannot find path to position {next_target}.")
+                # Mark to avoid revisiting
                 r, c = next_target
                 visited[r][c] = True
                 continue
             
-            # 경로를 따라 이동
+            # Move along the path
             for next_pos in path:
-                # 로봇 이동
+                # Robot movement
                 robot_pos = next_pos
                 r, c = next_pos
                 
@@ -179,54 +181,72 @@ def robot_search_animation(grid, start_row=0, start_col=0):
                     visited[r][c] = True
                     visited_cells.append(next_pos)
                 
-                # 프레임 추가
+                # Add frame
                 frames.append(update_visual_grid(robot_pos, visited_cells))
                 
-                # RedCell 확인
+                # Check for RedCell
                 if grid[r][c] == 2 and next_pos not in red_cell_positions:
                     red_cells_found += 1
                     red_cell_positions.append(next_pos)
-                    print(f"RedCell 발견! 위치: {next_pos}")
+                    print(f"RedCell found! Position: {next_pos}")
     
-    print(f"총 {len(frames)} 프레임의 애니메이션이 생성되었습니다")
+    print(f"Total {len(frames)} animation frames generated.")
     
-    # matplotlib 애니메이션 실행
+    # Run matplotlib animation
     fig, ax = plt.subplots(figsize=(8, 6))
     
-    # 애니메이션 함수
+    # Animation function
     def update(frame_num):
         if frame_num < len(frames):
             ax.clear()
             ax.imshow(frames[frame_num])
             
-            # 그리드 라인 추가
+            # Add grid lines
             ax.grid(which='major', axis='both', linestyle='-', color='k', linewidth=2)
             ax.set_xticks(np.arange(-0.5, cols, 1))
             ax.set_yticks(np.arange(-0.5, rows, 1))
             ax.set_xticklabels([])
             ax.set_yticklabels([])
             
-            # 제목 업데이트
+            # Update title - display differently depending on Korean support
             found_cells = sum(1 for pos in red_cell_positions if pos in visited_cells[:frame_num+1])
             
-            # 모든 RedCell을 찾은 후 원점으로 돌아가는 상태 표시
-            if found_cells == 2 and frame_num >= len(frames) - len(find_path(red_cell_positions[-1], start_pos)):
-                ax.set_title(f"RedCell: {found_cells}/2 - 원점으로 돌아가는 중")
+            if use_korean:
+                # Show status after finding all RedCells and returning to origin
+                if found_cells == 2 and frame_num >= len(frames) - len(find_path(red_cell_positions[-1], start_pos)) - 1:
+                    ax.set_title(f"RedCell: {found_cells}/2 - Returning to origin")
+                else:
+                    ax.set_title(f"Robot Search (RedCell: {found_cells}/2)")
             else:
-                ax.set_title(f"로봇 탐색 (RedCell: {found_cells}/2)")
+                # Display in English
+                if found_cells == 2 and frame_num >= len(frames) - len(find_path(red_cell_positions[-1], start_pos)) - 1:
+                    ax.set_title(f"RedCell: {found_cells}/2 - Returning to origin")
+                else:
+                    ax.set_title(f"Robot Search (RedCell: {found_cells}/2)")
     
-    # 범례 추가
+    # Add legend - display differently depending on Korean support
     import matplotlib.patches as mpatches
-    legend_elements = [
-        mpatches.Patch(color='white', label='빈 공간'),
-        mpatches.Patch(color='brown', label='장애물(Box)'),
-        mpatches.Patch(color='red', label='RedCell'),
-        mpatches.Patch(color='blue', label='로봇'),
-        mpatches.Patch(color=[0.8, 0.8, 1], label='방문한 위치')
-    ]
+    
+    if use_korean:
+        legend_elements = [
+            mpatches.Patch(color='white', label='Empty Space'),
+            mpatches.Patch(color='brown', label='Obstacle (Box)'),
+            mpatches.Patch(color='red', label='RedCell'),
+            mpatches.Patch(color='blue', label='Robot'),
+            mpatches.Patch(color=[0.8, 0.8, 1], label='Visited Positions')
+        ]
+    else:
+        legend_elements = [
+            mpatches.Patch(color='white', label='Empty'),
+            mpatches.Patch(color='brown', label='Box (Obstacle)'),
+            mpatches.Patch(color='red', label='RedCell'),
+            mpatches.Patch(color='blue', label='Robot'),
+            mpatches.Patch(color=[0.8, 0.8, 1], label='Visited')
+        ]
+    
     ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1, 1))
     
-    # 애니메이션 생성
+    # Create animation
     anim = animation.FuncAnimation(
         fig, update, frames=len(frames), interval=500, repeat=False)
     
@@ -235,15 +255,15 @@ def robot_search_animation(grid, start_row=0, start_col=0):
     
     return anim, red_cell_positions
 
-# 테스트 코드
+# Test code
 if __name__ == "__main__":
-    # 예: 0은 빈 공간, 1은 장애물(Box), 2는 RedCell
+    # Example: 0 is empty space, 1 is obstacle (Box), 2 is RedCell
     grid = [
         [0, 0, 0, 1, 0, 0],
-        [0, 1, 0, 0, 0, 2],  # RedCell 하나
+        [0, 1, 0, 0, 0, 2],  # One RedCell
         [0, 0, 0, 1, 0, 0],
-        [0, 1, 0, 2, 0, 0]   # RedCell 하나 더
+        [0, 1, 0, 2, 0, 0]   # One more RedCell
     ]
     
-    # 애니메이션 실행
+    # Run animation
     anim, found_positions = robot_search_animation(grid)
